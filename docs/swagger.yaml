@@ -1,0 +1,80 @@
+basePath: /
+definitions:
+  domain.Product:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      sale_price:
+        type: number
+      updated_at:
+        type: string
+    type: object
+  dto.CreateProductRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      sale_price:
+        type: number
+    required:
+    - name
+    - price
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      error_code:
+        type: string
+      successful:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: RESTful API for managing products
+  title: Product API
+  version: "1.0"
+paths:
+  /v1/product:
+    post:
+      consumes:
+      - application/json
+      description: Create a new product with the given details
+      parameters:
+      - description: Product data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Product'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create a new product
+      tags:
+      - product
+swagger: "2.0"
