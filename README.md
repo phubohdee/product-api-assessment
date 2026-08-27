@@ -1,5 +1,32 @@
 # Product API Assessment
 
+## 🏗 Project Structure
+
+```text
+product-api-assessment/
+├── cmd/
+│   └── api/
+│       ├── main.go                     # Entry point ของแอปพลิเคชัน
+│       └── migrate.go                  # CLI Handler สำหรับ Database Migration
+├── internal/
+│   ├── config/                         # Configuration & Database connection
+│   ├── domain/                         # Domain Entities และ Interfaces (Ports)
+│   ├── handler/
+│   │   ├── dto/                        # Data Transfer Objects (Request/Response)
+│   │   └── http/                       # HTTP Handlers (Gin) & Router setup
+│   ├── repository/
+│   │   └── postgres/                   # PostgreSQL Data Access implementation
+│   └── service/                        # Business Logic implementation
+├── migrations/                         # ไฟล์ SQL Migrations (.up.sql / .down.sql)
+├── mocks/                              # Mock Objects สำหรับ Unit Testing
+├── docs/                               # เอกสาร Swagger / OpenAPI Spec
+├── Makefile                            # คำสั่งลัดสำหรับการรัน และ ทดสอบระบบ
+├── docker-compose.yml                  # Docker setup สำหรับ PostgreSQL
+└── README.md
+```
+
+---
+
 ## 🚀 ขั้นตอนการติดตั้งและเริ่มต้นใช้งาน (Getting Started)
 
 ### 1. Clone หรือ Pull โปรเจกต์
