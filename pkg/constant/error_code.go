@@ -6,4 +6,5 @@ const (
 	ErrInvalidPrice     = "INVALID_PRICE"
 	ErrInvalidSalePrice = "INVALID_SALE_PRICE"
 	ErrInternalServer   = "INTERNAL_SERVER_ERROR"
+	ErrProductNotFound  = "PRODUCT_NOT_FOUND"
 )

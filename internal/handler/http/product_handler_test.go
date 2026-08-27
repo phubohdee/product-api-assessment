@@ -24,8 +24,105 @@ func setupRouter(mockService *mocks.MockProductService) *gin.Engine {
 	handler := NewProductHandler(mockService)
 	r := gin.Default()
 	r.POST("/v1/product", handler.CreateProduct)
+	r.PATCH("/v1/product/:id", handler.UpdateProduct)
 	return r
 }
+
+func TestUpdateProduct_Success(t *testing.T) {
+	mockService := new(mocks.MockProductService)
+
+	updatedProduct := &domain.Product{
+		ID:        1,
+		Name:      "Updated Name",
+		Price:     100.00,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	mockService.On("UpdateProduct", mock.Anything, 1, mock.AnythingOfType("*domain.UpdateProductRequest")).Return(updatedProduct, nil)
+
+	r := setupRouter(mockService)
+
+	body := `{"name":"Updated Name"}`
+	req, _ := http.NewRequest(http.MethodPatch, "/v1/product/1", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resp response.Response
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	assert.NoError(t, err)
+	assert.True(t, resp.Successful)
+	assert.NotNil(t, resp.Data)
+	mockService.AssertExpectations(t)
+}
+
+func TestUpdateProduct_InvalidID(t *testing.T) {
+	mockService := new(mocks.MockProductService)
+	r := setupRouter(mockService)
+
+	body := `{"name":"Updated Name"}`
+	req, _ := http.NewRequest(http.MethodPatch, "/v1/product/invalid", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	mockService.AssertNotCalled(t, "UpdateProduct")
+}
+
+func TestUpdateProduct_NotFound(t *testing.T) {
+	mockService := new(mocks.MockProductService)
+	mockService.On("UpdateProduct", mock.Anything, 999, mock.AnythingOfType("*domain.UpdateProductRequest")).
+		Return(nil, errors.New(constant.ErrProductNotFound))
+
+	r := setupRouter(mockService)
+
+	body := `{"name":"Updated Name"}`
+	req, _ := http.NewRequest(http.MethodPatch, "/v1/product/999", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+
+	var resp response.Response
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	assert.NoError(t, err)
+	assert.False(t, resp.Successful)
+	assert.Equal(t, constant.ErrProductNotFound, resp.ErrorCode)
+	mockService.AssertExpectations(t)
+}
+
+func TestUpdateProduct_InternalServerError(t *testing.T) {
+	mockService := new(mocks.MockProductService)
+	mockService.On("UpdateProduct", mock.Anything, 1, mock.AnythingOfType("*domain.UpdateProductRequest")).
+		Return(nil, errors.New(constant.ErrInternalServer))
+
+	r := setupRouter(mockService)
+
+	body := `{"name":"Updated Name"}`
+	req, _ := http.NewRequest(http.MethodPatch, "/v1/product/1", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	var resp response.Response
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	assert.NoError(t, err)
+	assert.False(t, resp.Successful)
+	assert.Equal(t, constant.ErrInternalServer, resp.ErrorCode)
+	mockService.AssertExpectations(t)
+}
+
 
 func TestCreateProduct_Success(t *testing.T) {
 	mockService := new(mocks.MockProductService)
@@ -162,3 +259,4 @@ func TestCreateProduct_WithNullableFields(t *testing.T) {
 	assert.NotNil(t, resp.Data)
 	mockService.AssertExpectations(t)
 }
+

@@ -20,16 +20,35 @@ definitions:
   dto.CreateProductRequest:
     properties:
       description:
+        example: Product Description
         type: string
       name:
+        example: Product Name
         type: string
       price:
+        example: 100
         type: number
       sale_price:
+        example: 80
         type: number
     required:
     - name
     - price
+    type: object
+  dto.UpdateProductRequest:
+    properties:
+      description:
+        example: Updated Description
+        type: string
+      name:
+        example: Updated Name
+        type: string
+      price:
+        example: 100
+        type: number
+      sale_price:
+        example: 80
+        type: number
     type: object
   response.Response:
     properties:
@@ -74,7 +93,55 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
       summary: Create a new product
+      tags:
+      - product
+  /v1/product/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update only the fields that are sent in the request body
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Product'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update a product
       tags:
       - product
 swagger: "2.0"

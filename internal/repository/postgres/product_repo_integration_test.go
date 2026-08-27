@@ -39,9 +39,6 @@ func TestMain(m *testing.M) {
 	}
 	defer testDB.Close()
 
-	// Clean up before tests
-	testDB.Exec("DELETE FROM products")
-
 	code := m.Run()
 	os.Exit(code)
 }
@@ -141,4 +138,46 @@ func TestProductRepository_Create_AutoIncrementID(t *testing.T) {
 
 	// Cleanup
 	testDB.Exec("DELETE FROM products WHERE id IN ($1, $2)", result1.ID, result2.ID)
+}
+
+func TestProductRepository_GetByID_Success(t *testing.T) {
+	repo := NewProductRepository(testDB)
+	ctx := context.Background()
+
+	created, err := repo.Create(ctx, &domain.Product{Name: "GetByID Test", Price: 99.00})
+	require.NoError(t, err)
+
+	found, err := repo.GetByID(ctx, created.ID)
+	require.NoError(t, err)
+	assert.Equal(t, created.ID, found.ID)
+	assert.Equal(t, "GetByID Test", found.Name)
+
+	testDB.Exec("DELETE FROM products WHERE id = $1", created.ID)
+}
+
+func TestProductRepository_GetByID_NotFound(t *testing.T) {
+	repo := NewProductRepository(testDB)
+	ctx := context.Background()
+
+	_, err := repo.GetByID(ctx, 999999)
+	assert.ErrorIs(t, err, sql.ErrNoRows)
+}
+
+func TestProductRepository_Update_Success(t *testing.T) {
+	repo := NewProductRepository(testDB)
+	ctx := context.Background()
+
+	created, err := repo.Create(ctx, &domain.Product{Name: "Old Name", Price: 100.00})
+	require.NoError(t, err)
+
+	created.Name = "Updated Name"
+	created.Price = 150.00
+	updated, err := repo.Update(ctx, created)
+	require.NoError(t, err)
+
+	assert.NotNil(t, updated)
+	assert.Equal(t, "Updated Name", updated.Name)
+	assert.Equal(t, 150.00, updated.Price)
+
+	testDB.Exec("DELETE FROM products WHERE id = $1", created.ID)
 }
