@@ -127,44 +127,6 @@ func TestCreateProduct_NegativePrice(t *testing.T) {
 	mockRepo.AssertNotCalled(t, "Create")
 }
 
-func TestCreateProduct_SalePriceGreaterThanPrice(t *testing.T) {
-	mockRepo := new(mocks.MockProductRepository)
-	svc := NewProductService(mockRepo)
-
-	salePrice := 150.00
-	req := &domain.CreateProductRequest{
-		Name:      "Test Product",
-		SalePrice: &salePrice,
-		Price:     100.00,
-	}
-
-	result, err := svc.CreateProduct(context.Background(), req)
-
-	assert.Nil(t, result)
-	assert.Error(t, err)
-	assert.Equal(t, constant.ErrInvalidSalePrice, err.Error())
-	mockRepo.AssertNotCalled(t, "Create")
-}
-
-func TestCreateProduct_SalePriceEqualToPrice(t *testing.T) {
-	mockRepo := new(mocks.MockProductRepository)
-	svc := NewProductService(mockRepo)
-
-	salePrice := 100.00
-	req := &domain.CreateProductRequest{
-		Name:      "Test Product",
-		SalePrice: &salePrice,
-		Price:     100.00,
-	}
-
-	result, err := svc.CreateProduct(context.Background(), req)
-
-	assert.Nil(t, result)
-	assert.Error(t, err)
-	assert.Equal(t, constant.ErrInvalidSalePrice, err.Error())
-	mockRepo.AssertNotCalled(t, "Create")
-}
-
 func TestUpdateProduct_Success_PartialUpdate(t *testing.T) {
 	mockRepo := new(mocks.MockProductRepository)
 	svc := NewProductService(mockRepo)

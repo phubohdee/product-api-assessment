@@ -121,9 +121,9 @@ make test-integration
 
 | Error Code | HTTP Status | คำอธิบาย |
 |------------|-------------|----------|
-| `INVALID_REQUEST` | 400 Bad Request | รูปแบบ JSON หรือ Request Body ไม่ถูกต้อง |
-| `INVALID_NAME` | 400 Bad Request | ชื่อสินค้าว่างเปล่า |
-| `INVALID_PRICE` | 400 Bad Request | ราคาหลักน้อยกว่าหรือเท่ากับ 0 |
-| `INVALID_SALE_PRICE` | 400 Bad Request | ราคาลดพิเศษมากกว่าหรือเท่ากับราคาหลัก |
-| `PRODUCT_NOT_FOUND` | 404 Not Found | ไม่พบสินค้าตาม ID ที่ระบุ |
-| `INTERNAL_SERVER_ERROR` | 500 Internal Server Error | เกิดข้อผิดพลาดฝั่ง Database หรือ Server |
+| `INVALID_REQUEST` | `400 Bad Request` | รูปแบบ JSON ไม่ถูกต้อง หรือโครงสร้างข้อมูลผิด |
+| `INVALID_NAME` | `400 Bad Request` | ชื่อสินค้าไม่สามารถเป็นค่าว่างได้ |
+| `INVALID_PRICE` | `400 Bad Request` | ราคาสินค้าต้องมากกว่า 0 |
+| `PRODUCT_NOT_FOUND` | `404 Not Found` | ไม่พบข้อมูลสินค้าในระบบตาม ID ที่ระบุ |
+| `INTERNAL_SERVER_ERROR` | `500 Internal Server Error` | เกิดข้อผิดพลาดภายในระบบ หรือไม่สามารถเชื่อมต่อ Database ได้ |
+

@@ -27,10 +27,6 @@ func (s *productService) CreateProduct(ctx context.Context, req *domain.CreatePr
 		return nil, errors.New(constant.ErrInvalidPrice)
 	}
 
-	if req.SalePrice != nil && *req.SalePrice >= req.Price {
-		return nil, errors.New(constant.ErrInvalidSalePrice)
-	}
-
 	product := &domain.Product{
 		Name:        req.Name,
 		Description: req.Description,
@@ -138,9 +134,6 @@ func validateProduct(product *domain.Product) error {
 	}
 	if product.Price <= 0 {
 		return errors.New(constant.ErrInvalidPrice)
-	}
-	if product.SalePrice != nil && *product.SalePrice >= product.Price {
-		return errors.New(constant.ErrInvalidSalePrice)
 	}
 	return nil
 }
