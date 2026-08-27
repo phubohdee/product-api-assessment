@@ -14,3 +14,9 @@ migrate-down:
 
 gen-swagger:
 	swag init -g cmd/api/main.go -o docs
+
+test:
+	go test ./... -v -count=1
+
+test-integration:
+	go test ./... -v -count=1 -tags=integration
