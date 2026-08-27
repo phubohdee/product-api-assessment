@@ -1,6 +1,8 @@
 package http
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -65,7 +67,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 // @Produce      json
 // @Param        id       path      int                       true  "Product ID"
 // @Param        request  body      dto.UpdateProductRequest  true  "Fields to update"
-// @Success      200      {object}  response.Response
+// @Success      200      {object}  response.Response{data=domain.Product}
 // @Failure      400      {object}  response.Response
 // @Failure      404      {object}  response.Response
 // @Failure      500      {object}  response.Response
@@ -77,20 +79,20 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	var req dto.UpdateProductRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	bodyBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil || len(bodyBytes) == 0 {
 		c.JSON(http.StatusBadRequest, response.Error(constant.ErrInvalidRequest))
 		return
 	}
 
-	domainReq := &domain.UpdateProductRequest{
-		Name:        req.Name,
-		Description: req.Description,
-		SalePrice:   req.SalePrice,
-		Price:       req.Price,
+	var domainReq domain.UpdateProductRequest
+	if err := json.Unmarshal(bodyBytes, &domainReq); err != nil {
+		c.JSON(http.StatusBadRequest, response.Error(constant.ErrInvalidRequest))
+		return
 	}
 
-	if err := h.service.UpdateProduct(c.Request.Context(), id, domainReq); err != nil {
+	updatedProduct, err := h.service.UpdateProduct(c.Request.Context(), id, &domainReq)
+	if err != nil {
 		if err.Error() == constant.ErrProductNotFound {
 			c.JSON(http.StatusNotFound, response.Error(err.Error()))
 			return
@@ -103,5 +105,5 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.Success(nil))
+	c.JSON(http.StatusOK, response.Success(updatedProduct))
 }

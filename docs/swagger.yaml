@@ -20,18 +20,35 @@ definitions:
   dto.CreateProductRequest:
     properties:
       description:
+        example: Product Description
         type: string
       name:
+        example: Product Name
         type: string
       price:
+        example: 100
         type: number
       sale_price:
+        example: 80
         type: number
     required:
     - name
     - price
     type: object
   dto.UpdateProductRequest:
+    properties:
+      description:
+        example: Updated Description
+        type: string
+      name:
+        example: Updated Name
+        type: string
+      price:
+        example: 100
+        type: number
+      sale_price:
+        example: 80
+        type: number
     type: object
   response.Response:
     properties:
@@ -106,7 +123,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Product'
+              type: object
         "400":
           description: Bad Request
           schema:

@@ -66,20 +66,34 @@ func (r *productRepository) GetByID(ctx context.Context, id int) (*domain.Produc
 	return product, nil
 }
 
-func (r *productRepository) Update(ctx context.Context, product *domain.Product) error {
+func (r *productRepository) Update(ctx context.Context, product *domain.Product) (*domain.Product, error) {
 	query := `
 		UPDATE products
 		SET name = $1, description = $2, sale_price = $3, price = $4, updated_at = NOW()
 		WHERE id = $5
+		RETURNING id, name, description, sale_price, price, created_at, updated_at
 	`
 
-	_, err := r.db.ExecContext(ctx, query,
+	updated := &domain.Product{}
+	err := r.db.QueryRowContext(ctx, query,
 		product.Name,
 		product.Description,
 		product.SalePrice,
 		product.Price,
 		product.ID,
+	).Scan(
+		&updated.ID,
+		&updated.Name,
+		&updated.Description,
+		&updated.SalePrice,
+		&updated.Price,
+		&updated.CreatedAt,
+		&updated.UpdatedAt,
 	)
 
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	return updated, nil
 }

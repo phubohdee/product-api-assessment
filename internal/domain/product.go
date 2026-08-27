@@ -19,12 +19,12 @@ type Product struct {
 type ProductRepository interface {
 	Create(ctx context.Context, product *Product) (*Product, error)
 	GetByID(ctx context.Context, id int) (*Product, error)
-	Update(ctx context.Context, product *Product) error
+	Update(ctx context.Context, product *Product) (*Product, error)
 }
 
 type ProductService interface {
 	CreateProduct(ctx context.Context, req *CreateProductRequest) (*Product, error)
-	UpdateProduct(ctx context.Context, id int, req *UpdateProductRequest) error
+	UpdateProduct(ctx context.Context, id int, req *UpdateProductRequest) (*Product, error)
 }
 
 type CreateProductRequest struct {

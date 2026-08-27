@@ -39,9 +39,6 @@ func TestMain(m *testing.M) {
 	}
 	defer testDB.Close()
 
-	// Clean up before tests
-	testDB.Exec("DELETE FROM products")
-
 	code := m.Run()
 	os.Exit(code)
 }
@@ -175,11 +172,10 @@ func TestProductRepository_Update_Success(t *testing.T) {
 
 	created.Name = "Updated Name"
 	created.Price = 150.00
-	err = repo.Update(ctx, created)
+	updated, err := repo.Update(ctx, created)
 	require.NoError(t, err)
 
-	updated, err := repo.GetByID(ctx, created.ID)
-	require.NoError(t, err)
+	assert.NotNil(t, updated)
 	assert.Equal(t, "Updated Name", updated.Name)
 	assert.Equal(t, 150.00, updated.Price)
 

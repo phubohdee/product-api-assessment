@@ -45,28 +45,29 @@ func (s *productService) CreateProduct(ctx context.Context, req *domain.CreatePr
 	return createdProduct, nil
 }
 
-func (s *productService) UpdateProduct(ctx context.Context, id int, req *domain.UpdateProductRequest) error {
+func (s *productService) UpdateProduct(ctx context.Context, id int, req *domain.UpdateProductRequest) (*domain.Product, error) {
 	product, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return errors.New(constant.ErrProductNotFound)
+			return nil, errors.New(constant.ErrProductNotFound)
 		}
-		return errors.New(constant.ErrInternalServer)
+		return nil, errors.New(constant.ErrInternalServer)
 	}
 
 	if err := mergeUpdateFields(product, req); err != nil {
-		return errors.New(constant.ErrInvalidRequest)
+		return nil, errors.New(constant.ErrInvalidRequest)
 	}
 
 	if err := validateProduct(product); err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := s.repo.Update(ctx, product); err != nil {
-		return errors.New(constant.ErrInternalServer)
+	updatedProduct, err := s.repo.Update(ctx, product)
+	if err != nil {
+		return nil, errors.New(constant.ErrInternalServer)
 	}
 
-	return nil
+	return updatedProduct, nil
 }
 
 func mergeUpdateFields(product *domain.Product, req *domain.UpdateProductRequest) error {

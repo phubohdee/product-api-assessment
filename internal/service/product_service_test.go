@@ -174,18 +174,25 @@ func TestUpdateProduct_Success_PartialUpdate(t *testing.T) {
 		Name:  "Old Name",
 		Price: 100.00,
 	}
+	updatedProduct := &domain.Product{
+		ID:    1,
+		Name:  "New Name",
+		Price: 100.00,
+	}
 
 	mockRepo.On("GetByID", mock.Anything, 1).Return(existing, nil)
 	mockRepo.On("Update", mock.Anything, mock.MatchedBy(func(p *domain.Product) bool {
 		return p.Name == "New Name" && p.Price == 100.00
-	})).Return(nil)
+	})).Return(updatedProduct, nil)
 
 	req := &domain.UpdateProductRequest{
 		Name: json.RawMessage(`"New Name"`),
 	}
-	err := svc.UpdateProduct(context.Background(), 1, req)
+	result, err := svc.UpdateProduct(context.Background(), 1, req)
 
 	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, "New Name", result.Name)
 	mockRepo.AssertExpectations(t)
 }
 
@@ -200,18 +207,26 @@ func TestUpdateProduct_Success_SetNull(t *testing.T) {
 		Description: &desc,
 		Price:       100.00,
 	}
+	updatedProduct := &domain.Product{
+		ID:          1,
+		Name:        "Name",
+		Description: nil,
+		Price:       100.00,
+	}
 
 	mockRepo.On("GetByID", mock.Anything, 1).Return(existing, nil)
 	mockRepo.On("Update", mock.Anything, mock.MatchedBy(func(p *domain.Product) bool {
 		return p.Description == nil
-	})).Return(nil)
+	})).Return(updatedProduct, nil)
 
 	req := &domain.UpdateProductRequest{
 		Description: json.RawMessage(`null`),
 	}
-	err := svc.UpdateProduct(context.Background(), 1, req)
+	result, err := svc.UpdateProduct(context.Background(), 1, req)
 
 	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Nil(t, result.Description)
 	mockRepo.AssertExpectations(t)
 }
 
@@ -224,8 +239,9 @@ func TestUpdateProduct_NotFound(t *testing.T) {
 	req := &domain.UpdateProductRequest{
 		Name: json.RawMessage(`"New Name"`),
 	}
-	err := svc.UpdateProduct(context.Background(), 999, req)
+	result, err := svc.UpdateProduct(context.Background(), 999, req)
 
+	assert.Nil(t, result)
 	assert.Error(t, err)
 	assert.Equal(t, constant.ErrProductNotFound, err.Error())
 	mockRepo.AssertNotCalled(t, "Update")

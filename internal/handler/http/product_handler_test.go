@@ -30,7 +30,16 @@ func setupRouter(mockService *mocks.MockProductService) *gin.Engine {
 
 func TestUpdateProduct_Success(t *testing.T) {
 	mockService := new(mocks.MockProductService)
-	mockService.On("UpdateProduct", mock.Anything, 1, mock.AnythingOfType("*domain.UpdateProductRequest")).Return(nil)
+
+	updatedProduct := &domain.Product{
+		ID:        1,
+		Name:      "Updated Name",
+		Price:     100.00,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	mockService.On("UpdateProduct", mock.Anything, 1, mock.AnythingOfType("*domain.UpdateProductRequest")).Return(updatedProduct, nil)
 
 	r := setupRouter(mockService)
 
@@ -47,6 +56,7 @@ func TestUpdateProduct_Success(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
 	assert.NoError(t, err)
 	assert.True(t, resp.Successful)
+	assert.NotNil(t, resp.Data)
 	mockService.AssertExpectations(t)
 }
 
@@ -68,7 +78,7 @@ func TestUpdateProduct_InvalidID(t *testing.T) {
 func TestUpdateProduct_NotFound(t *testing.T) {
 	mockService := new(mocks.MockProductService)
 	mockService.On("UpdateProduct", mock.Anything, 999, mock.AnythingOfType("*domain.UpdateProductRequest")).
-		Return(errors.New(constant.ErrProductNotFound))
+		Return(nil, errors.New(constant.ErrProductNotFound))
 
 	r := setupRouter(mockService)
 
@@ -92,7 +102,7 @@ func TestUpdateProduct_NotFound(t *testing.T) {
 func TestUpdateProduct_InternalServerError(t *testing.T) {
 	mockService := new(mocks.MockProductService)
 	mockService.On("UpdateProduct", mock.Anything, 1, mock.AnythingOfType("*domain.UpdateProductRequest")).
-		Return(errors.New(constant.ErrInternalServer))
+		Return(nil, errors.New(constant.ErrInternalServer))
 
 	r := setupRouter(mockService)
 

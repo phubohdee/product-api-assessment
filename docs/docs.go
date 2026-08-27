@@ -108,7 +108,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/domain.Product"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -168,21 +180,43 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Product Description"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Product Name"
                 },
                 "price": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 100
                 },
                 "sale_price": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 80
                 }
             }
         },
         "dto.UpdateProductRequest": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Updated Description"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Updated Name"
+                },
+                "price": {
+                    "type": "number",
+                    "example": 100
+                },
+                "sale_price": {
+                    "type": "number",
+                    "example": 80
+                }
+            }
         },
         "response.Response": {
             "type": "object",
