@@ -16,6 +16,7 @@ func NewRouter(productHandler *ProductHandler) *gin.Engine {
 		v1.GET("/api-docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 		v1.POST("/product", productHandler.CreateProduct)
+		v1.PATCH("/product/:id", productHandler.UpdateProduct)
 	}
 
 	return r

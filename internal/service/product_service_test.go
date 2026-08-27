@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -162,3 +164,72 @@ func TestCreateProduct_SalePriceEqualToPrice(t *testing.T) {
 	assert.Equal(t, constant.ErrInvalidSalePrice, err.Error())
 	mockRepo.AssertNotCalled(t, "Create")
 }
+
+func TestUpdateProduct_Success_PartialUpdate(t *testing.T) {
+	mockRepo := new(mocks.MockProductRepository)
+	svc := NewProductService(mockRepo)
+
+	existing := &domain.Product{
+		ID:    1,
+		Name:  "Old Name",
+		Price: 100.00,
+	}
+
+	mockRepo.On("GetByID", mock.Anything, 1).Return(existing, nil)
+	mockRepo.On("Update", mock.Anything, mock.MatchedBy(func(p *domain.Product) bool {
+		return p.Name == "New Name" && p.Price == 100.00
+	})).Return(nil)
+
+	req := &domain.UpdateProductRequest{
+		Name: json.RawMessage(`"New Name"`),
+	}
+	err := svc.UpdateProduct(context.Background(), 1, req)
+
+	assert.NoError(t, err)
+	mockRepo.AssertExpectations(t)
+}
+
+func TestUpdateProduct_Success_SetNull(t *testing.T) {
+	mockRepo := new(mocks.MockProductRepository)
+	svc := NewProductService(mockRepo)
+
+	desc := "Old Desc"
+	existing := &domain.Product{
+		ID:          1,
+		Name:        "Name",
+		Description: &desc,
+		Price:       100.00,
+	}
+
+	mockRepo.On("GetByID", mock.Anything, 1).Return(existing, nil)
+	mockRepo.On("Update", mock.Anything, mock.MatchedBy(func(p *domain.Product) bool {
+		return p.Description == nil
+	})).Return(nil)
+
+	req := &domain.UpdateProductRequest{
+		Description: json.RawMessage(`null`),
+	}
+	err := svc.UpdateProduct(context.Background(), 1, req)
+
+	assert.NoError(t, err)
+	mockRepo.AssertExpectations(t)
+}
+
+func TestUpdateProduct_NotFound(t *testing.T) {
+	mockRepo := new(mocks.MockProductRepository)
+	svc := NewProductService(mockRepo)
+
+	mockRepo.On("GetByID", mock.Anything, 999).Return(nil, sql.ErrNoRows)
+
+	req := &domain.UpdateProductRequest{
+		Name: json.RawMessage(`"New Name"`),
+	}
+	err := svc.UpdateProduct(context.Background(), 999, req)
+
+	assert.Error(t, err)
+	assert.Equal(t, constant.ErrProductNotFound, err.Error())
+	mockRepo.AssertNotCalled(t, "Update")
+}
+
+
+

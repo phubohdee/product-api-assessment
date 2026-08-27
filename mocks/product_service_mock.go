@@ -19,3 +19,8 @@ func (m *MockProductService) CreateProduct(ctx context.Context, req *domain.Crea
 	}
 	return args.Get(0).(*domain.Product), args.Error(1)
 }
+
+func (m *MockProductService) UpdateProduct(ctx context.Context, id int, req *domain.UpdateProductRequest) error {
+	args := m.Called(ctx, id, req)
+	return args.Error(0)
+}
